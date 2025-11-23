@@ -1,0 +1,70 @@
+//@version=6
+indicator("Bar Count", overlay=true, max_labels_count=500)
+
+sizeOption = input.string(defval="Normal", title="标签大小",
+     options=["Auto", "Huge", "Large", "Normal", "Small", "Tiny"]) 
+     
+labelSize = (sizeOption == "Huge") ? size.huge :
+     (sizeOption == "Large") ? size.large :
+     (sizeOption == "Small") ? size.small :
+     (sizeOption == "Tiny") ? size.tiny :
+     (sizeOption == "Auto") ? size.auto :
+         size.normal     
+
+color c_labelColor1 = input.color(color.orange, "会话1文字颜色")
+color c_labelColor2 = input.color(color.aqua, "会话2文字颜色")
+color c_labelColor3 = input.color(color.fuchsia, "会话3文字颜色")
+
+s1_show = input.bool(true, "显示会话1标签")
+s1_session = input.session("0930-1615", "会话1时段(HHMM-HHMM)")
+s1_tz_choice = input.string(defval="America/New_York", title="会话1时区",
+     options=["Exchange","Etc/UTC","America/New_York","Europe/London","Asia/Shanghai", "Asia/Tokyo"])
+s1_tz = s1_tz_choice == "Exchange" ? syminfo.timezone : s1_tz_choice
+s1_step = input.int(defval=2, title="会话1每隔X柱显示", minval=1)
+
+s2_show = input.bool(true, "显示会话2标签")
+s2_session = input.session("0900-1500", "会话2时段(HHMM-HHMM)")
+s2_tz_choice = input.string(defval="Asia/Tokyo", title="会话2时区",
+     options=["Exchange","Etc/UTC","America/New_York","Europe/London","Asia/Shanghai", "Asia/Tokyo"])
+s2_tz = s2_tz_choice == "Exchange" ? syminfo.timezone : s2_tz_choice
+s2_step = input.int(defval=2, title="会话2每隔X柱显示", minval=1)
+
+s3_show = input.bool(true, "显示会话3标签")
+s3_session = input.session("0930-1600", "会话3时段(HHMM-HHMM)")
+s3_tz_choice = input.string(defval="Exchange", title="会话3时区",
+     options=["Exchange","Etc/UTC","America/New_York","Europe/London","Asia/Shanghai", "Asia/Tokyo"])
+s3_tz = s3_tz_choice == "Exchange" ? syminfo.timezone : s3_tz_choice
+s3_step = input.int(defval=2, title="会话3每隔X柱显示", minval=1)
+
+in_s1 = not na(time(timeframe.period, s1_session, s1_tz))
+in_s2 = not na(time(timeframe.period, s2_session, s2_tz))
+in_s3 = not na(time(timeframe.period, s3_session, s3_tz))
+
+var count1 = 0
+var count2 = 0
+var count3 = 0
+
+if in_s1
+    count1 := in_s1[1] ? count1 + 1 : 1
+if in_s2
+    count2 := in_s2[1] ? count2 + 1 : 1
+if in_s3
+    count3 := in_s3[1] ? count3 + 1 : 1
+
+if s1_show and in_s1 and count1 % s1_step == 0
+    label1 = label.new(bar_index, 0, style=label.style_none, text=str.tostring(count1))
+    label.set_textcolor(label1, c_labelColor1)
+    label.set_yloc(label1, yloc.abovebar)
+    label.set_size(label1, labelSize)
+
+if s2_show and in_s2 and count2 % s2_step == 0
+    label2 = label.new(bar_index, 0, style=label.style_none, text=str.tostring(count2))
+    label.set_textcolor(label2, c_labelColor2)
+    label.set_yloc(label2, yloc.abovebar)
+    label.set_size(label2, labelSize)
+
+if s3_show and in_s3 and count3 % s3_step == 0
+    label3 = label.new(bar_index, 0, style=label.style_none, text=str.tostring(count3))
+    label.set_textcolor(label3, c_labelColor3)
+    label.set_yloc(label3, yloc.abovebar)
+    label.set_size(label3, labelSize)
