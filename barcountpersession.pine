@@ -30,8 +30,8 @@ s2_tz = s2_tz_choice == "Exchange" ? syminfo.timezone : s2_tz_choice
 s2_step = input.int(defval=2, title="会话2每隔X柱显示", minval=1)
 
 s3_show = input.bool(true, "显示会话3标签")
-s3_session = input.session("0930-1600", "会话3时段(HHMM-HHMM)")
-s3_tz_choice = input.string(defval="Exchange", title="会话3时区",
+s3_session = input.session("0930-1500", "会话3时段(HHMM-HHMM)")
+s3_tz_choice = input.string(defval="Asia/Shanghai", title="会话3时区",
      options=["Exchange","Etc/UTC","America/New_York","Europe/London","Asia/Shanghai", "Asia/Tokyo"])
 s3_tz = s3_tz_choice == "Exchange" ? syminfo.timezone : s3_tz_choice
 s3_step = input.int(defval=2, title="会话3每隔X柱显示", minval=1)
@@ -44,12 +44,20 @@ var count1 = 0
 var count2 = 0
 var count3 = 0
 
+s1_day_new = ta.change(time("D", s1_session, s1_tz))
+s2_day_new = ta.change(time("D", s2_session, s2_tz))
+s3_day_new = ta.change(time("D", s3_session, s3_tz))
+
+s1_start = in_s1 and (not in_s1[1] or s1_day_new != 0)
+s2_start = in_s2 and (not in_s2[1] or s2_day_new != 0)
+s3_start = in_s3 and (not in_s3[1] or s3_day_new != 0)
+
 if in_s1
-    count1 := in_s1[1] ? count1 + 1 : 1
+    count1 := s1_start ? 1 : count1 + 1
 if in_s2
-    count2 := in_s2[1] ? count2 + 1 : 1
+    count2 := s2_start ? 1 : count2 + 1
 if in_s3
-    count3 := in_s3[1] ? count3 + 1 : 1
+    count3 := s3_start ? 1 : count3 + 1
 
 if s1_show and in_s1 and count1 % s1_step == 0
     label1 = label.new(bar_index, 0, style=label.style_none, text=str.tostring(count1))
